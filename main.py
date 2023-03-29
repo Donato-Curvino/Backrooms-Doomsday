@@ -1,5 +1,6 @@
 import pygame
 from components.player import *
+from components.map import *
 
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
@@ -40,10 +41,11 @@ class Game:
         self.xyz = 1234
 
 
-p = Player(screen)
+m = Map(screen, "tst1")
+p = Player(screen, m)
 
 rgb, state = (255, 0, 0), 1
-chng = 1
+chng = 0
 
 print(screen)
 
@@ -54,6 +56,7 @@ while running:
 
     p.move(dt)
     # screen.blit(p.image, p.rect)
+    m.draw()
     p.draw()
 
     dt = clk.tick(60)
