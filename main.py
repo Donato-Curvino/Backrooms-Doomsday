@@ -1,37 +1,38 @@
 import pygame
 from components.player import *
 from components.map import *
+from components.constants import *
 
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode(RES)
 running = True
 clk = pygame.time.Clock()
 dt = 1
 
 
-def rainbow(rgb, state, chng=1):
-    r, g, b = rgb
-    if state == 1:
+def rainbow(clr, st, incr=1):
+    r, g, b = clr
+    if st == 1:
         if r > 0:
-            r -= chng
-            g += chng
+            r -= incr
+            g += incr
         else:
-            state = 2
-    if state == 2:
+            st = 2
+    if st == 2:
         if g > 0:
-            g -= chng
-            b += chng
+            g -= incr
+            b += incr
         else:
-            state = 3
-    if state == 3:
+            st = 3
+    if st == 3:
         if b > 0:
-            b -= chng
-            r += chng
+            b -= incr
+            r += incr
         else:
-            state = 1
-            r -= chng
-            g += chng
-    return (r, g, b), state
+            st = 1
+            r -= incr
+            g += incr
+    return (r, g, b), st
 
 
 class Game:
@@ -41,7 +42,7 @@ class Game:
         self.xyz = 1234
 
 
-m = Map(screen, "tst1")
+m = Map(screen)
 p = Player(screen, m)
 
 rgb, state = (255, 0, 0), 1
@@ -52,7 +53,7 @@ print(screen)
 while running:
     rgb, state = rainbow(rgb, state, chng)
     # print(rgb)
-    screen.fill(rgb)
+    screen.fill((0, 0, 100))
 
     p.move(dt)
     # screen.blit(p.image, p.rect)
@@ -62,6 +63,7 @@ while running:
     dt = clk.tick(60)
     # print(dt)
     pygame.display.flip()
+    # print(p.angle)
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):

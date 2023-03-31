@@ -1,5 +1,6 @@
 from numpy import pi, array
 
+RES = (1280, 720)
 DEG = pi / 180
 FOV_ANGLE = 30
 CHECKS_PER_RAY = 25
