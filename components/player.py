@@ -63,15 +63,8 @@ class Player(pygame.sprite.Sprite):
     def raytrace(self):
         r = 500
         # tan = y/x => x = 25 cot
+        lengths = []
 
-        # print(self.angle, end=" | ")
-        dys = []
-        yends = []
-        xs = []
-        rs = []
-        its = []
-        cnds = []
-        ls = []
         for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0]):
             theta = i*DEG + self.angle
             if theta >= (2*pi): theta -= 2*pi
@@ -79,16 +72,13 @@ class Player(pygame.sprite.Sprite):
             down = 0 < theta < pi
             right = theta < (pi / 2) or theta > ((3 * pi) / 2)
             ratio = tan(theta)
-            rays = []
-            rs.append(right)
 
             dx = 25 * (1 / tan(theta)) * (1 if down else -1) if theta % pi != 0 else 0
             dy = 25 * tan(theta) * (1 if right else -1) if (theta - pi / 2) % pi != 0 else 0
-            dys.append(dy)
 
             # check horizontal -----------------------------------------------------------------------------------------
             x = (self.rect.centerx // 25) * 25
-            if right and (x % 25) != 0: x += 25
+            if right: x += 25
             y_end = (abs(self.rect.centerx - x) / 25) * dy + self.rect.centery if dx != 0 else 10000000
 
             while (0 <= y_end < (25 * len(self.map.data))) and (0 <= x < (25 * len(self.map.data[0]))) and (not self.collide((x - (0 if right else 25), y_end), right, down)):
@@ -97,7 +87,7 @@ class Player(pygame.sprite.Sprite):
 
             # check vertical -------------------------------------------------------------------------------------------
             y = (self.rect.centery // 25) * 25
-            if down and (y % 25) != 0: y += 25
+            if down: y += 25
             x_end = (abs(self.rect.centery - y) / 25) * dx + self.rect.centerx if dy != 0 else 10000000
 
             while 0 <= x_end < (25 * len(self.map.data[0])) and (0 <= y <= (25 * len(self.map.data))) and not self.collide((x_end, y - (0 if down else 25)), right, down):
@@ -106,23 +96,24 @@ class Player(pygame.sprite.Sprite):
 
             # check lengths --------------------------------------------------------------------------------------------
             # ls.append((int(sqrt(x**2 + y_end**2)), int(sqrt(x_end**2 + y**2))))
-            if sqrt((x - self.rect.centerx)**2 + (y_end - self.rect.centery)**2) < sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2):
+            l1 = sqrt((x - self.rect.centerx)**2 + (y_end - self.rect.centery)**2)
+            l2 = sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2)
+            if l1 < l2:
                 endpos = (x, y_end)
-                rays.append(sqrt((x - self.rect.centerx)**2 + (y_end - self.rect.centery)**2))
-                xs.append(x)
+                lengths.append((l1 * cos(theta - self.angle), 0))
             else:
                 endpos = (x_end, y)
-                rays.append(sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2))
+                lengths.append((l2 * cos(theta - self.angle), 1))
 
             # pygame.draw.line(self.screen, "white", self.rect.center, endpos)
-            # pygame.draw.line(self.screen, "red", self.rect.center, (x, y_end))
-            pygame.draw.line(self.screen, "yellow", self.rect.center, (x_end, y))
-            # pygame.display.flip()
-        # print(cnds, " <=> ", yends)
-        # print(ls)
-        pygame.draw.line(self.screen, "black", self.rect.center,
-                         (self.rect.centerx + r * cos(self.angle), self.rect.centery + r * sin(self.angle)), width=1)
+        pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
+        return lengths
+
+    def render(self, rays):
+        for i in range(len(rays)):
+            l = round(25 * RES[1] / (rays[i][0] + .0001))
+            pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
 
     def draw(self):
-        self.raytrace()
+        self.render(self.raytrace())
         self.screen.blit(self.image, self.rect)
