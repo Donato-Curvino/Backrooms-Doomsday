@@ -63,6 +63,7 @@ class Player(pygame.sprite.Sprite):
     def raytrace(self):
         r = 500
         # tan = y/x => x = 25 cot
+        lengths = []
 
         for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0]):
             theta = i*DEG + self.angle
@@ -95,14 +96,24 @@ class Player(pygame.sprite.Sprite):
 
             # check lengths --------------------------------------------------------------------------------------------
             # ls.append((int(sqrt(x**2 + y_end**2)), int(sqrt(x_end**2 + y**2))))
-            if sqrt((x - self.rect.centerx)**2 + (y_end - self.rect.centery)**2) < sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2):
+            l1 = sqrt((x - self.rect.centerx)**2 + (y_end - self.rect.centery)**2)
+            l2 = sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2)
+            if l1 < l2:
                 endpos = (x, y_end)
+                lengths.append((l1 * cos(theta - self.angle), 0))
             else:
                 endpos = (x_end, y)
+                lengths.append((l2 * cos(theta - self.angle), 1))
 
-            pygame.draw.line(self.screen, "white", self.rect.center, endpos)
-        pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + r * cos(self.angle), self.rect.centery + r * sin(self.angle)), width=1)
+            # pygame.draw.line(self.screen, "white", self.rect.center, endpos)
+        pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
+        return lengths
+
+    def render(self, rays):
+        for i in range(len(rays)):
+            l = round(25 * RES[1] / (rays[i][0] + .0001))
+            pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
 
     def draw(self):
-        self.raytrace()
+        self.render(self.raytrace())
         self.screen.blit(self.image, self.rect)
