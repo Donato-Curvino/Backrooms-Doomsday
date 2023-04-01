@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         # subclass initialization
         # self.rect.x = 250
         # self.rect.y = 250
-        self.rect.center = (500, 400)
+        self.rect.center = (312, 500)
         self.speed = 25
         self.angle = 270 * DEG
 
@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
         xpos = int(int(pos[0]) / 25)
         ypos = int(int(pos[1]) / 25)
         # print(pos)
-        return self.map.data[ypos][xpos] == 1
+        return self.map.data[xpos][ypos] == CLR_WALL
 
     def move(self, dt):
         keys = pygame.key.get_pressed()
@@ -106,7 +106,7 @@ class Player(pygame.sprite.Sprite):
                 lengths.append((l2 * cos(theta - self.angle), 1))
 
             # pygame.draw.line(self.screen, "white", self.rect.center, endpos)
-        pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
+        # pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
         return lengths
 
     def render(self, rays):
@@ -115,5 +115,6 @@ class Player(pygame.sprite.Sprite):
             pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
 
     def draw(self):
+        # self.raytrace()
         self.render(self.raytrace())
-        self.screen.blit(self.image, self.rect)
+        # self.screen.blit(self.image, self.rect)

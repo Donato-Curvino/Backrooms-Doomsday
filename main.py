@@ -4,7 +4,7 @@ from components.map import *
 from components.constants import *
 
 pygame.init()
-screen = pygame.display.set_mode(RES)
+screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
 running = True
 clk = pygame.time.Clock()
 dt = 1
@@ -49,6 +49,8 @@ rgb, state = (255, 0, 0), 1
 chng = 0
 
 print(screen)
+# print(m.pic[0][0] & (255 << 8), 255 << 8)
+
 
 while running:
     rgb, state = rainbow(rgb, state, chng)
@@ -57,7 +59,7 @@ while running:
 
     p.move(dt)
     # screen.blit(p.image, p.rect)
-    m.draw()
+    # m.draw()
     p.draw()
 
     dt = clk.tick(60)
