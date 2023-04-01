@@ -36,7 +36,7 @@ class Map:
         #              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         #              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
-        self.data = pygame.surfarray.array2d(pygame.image.load("assets/creeper.png").convert())
+        self.data = pygame.surfarray.array2d(pygame.image.load("assets/backroom.png").convert())
 
         self.screen = screen
 
