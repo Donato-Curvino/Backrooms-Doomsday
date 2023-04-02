@@ -8,6 +8,7 @@ screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
 running = True
 clk = pygame.time.Clock()
 dt = 1
+DEBUG = True
 
 
 def rainbow(clr, st, incr=1):
@@ -59,8 +60,8 @@ while running:
 
     p.move(dt)
     # screen.blit(p.image, p.rect)
-    # m.draw()
-    p.draw()
+    m.draw(DEBUG)
+    p.draw(DEBUG)
 
     dt = clk.tick(60)
     # print(dt)

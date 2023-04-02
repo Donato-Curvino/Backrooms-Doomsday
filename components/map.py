@@ -37,7 +37,7 @@ class Map:
         #              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
         self.data = pygame.surfarray.array2d(pygame.image.load("assets/backroom.png").convert())
-        self.texture = pygame.surfarray.array2d(pygame.image.load("assets/default.png").convert())
+        self.texture = pygame.surfarray.array2d(pygame.image.load("assets/creeper.png").convert())
         for col in range(len(self.texture)):
             for p in range(len(self.texture[col])):
                 if (self.texture[col][p] >> 16) < 20:
@@ -52,8 +52,9 @@ class Map:
     def load(self, src):
         pass
 
-    def draw(self):
+    def draw(self, DEBUG):
         # self.screen.blit(self.image, self.rect)
+        if not DEBUG: return
         for y in range(len(self.data)):
             for x in range(len(self.data[y])):
                 if self.data[x][y] == CLR_WALL: pygame.draw.rect(self.screen, (0, 255, 0), (x*25, y*25, 25, 25))

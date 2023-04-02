@@ -60,7 +60,7 @@ class Player(pygame.sprite.Sprite):
             # self.image = pygame.transform.rotate(self.image, -self.angle)
         # print(self.angle)
 
-    def raytrace(self):
+    def raytrace(self, DEBUG=False):
         r = 500
         # tan = y/x => x = 25 cot
         lengths = []
@@ -105,7 +105,7 @@ class Player(pygame.sprite.Sprite):
                 endpos = (x_end, y)
                 lengths.append((l2 * cos(theta - self.angle), 1, int(x_end % len(self.map.texture))))
 
-            # pygame.draw.line(self.screen, "white", self.rect.center, endpos)
+            if DEBUG: pygame.draw.line(self.screen, "white", self.rect.center, endpos)
         # pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
         return lengths
 
@@ -121,7 +121,9 @@ class Player(pygame.sprite.Sprite):
                 pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * 2, int(y_pos)), (i * 2, int(y_pos + step)), width=2)
                 y_pos += step
 
-    def draw(self):
-        # self.raytrace()
-        self.render(self.raytrace())
-        # self.screen.blit(self.image, self.rect)
+    def draw(self, DEBUG):
+        if DEBUG:
+            self.raytrace(DEBUG)
+            self.screen.blit(self.image, self.rect)
+        else:
+            self.render(self.raytrace())
