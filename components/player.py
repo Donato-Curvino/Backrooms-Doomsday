@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         # tan = y/x => x = 25 cot
         lengths = []
 
-        for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0]):
+        for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0] // 2):
             theta = i*DEG + self.angle
             if theta >= (2*pi): theta -= 2*pi
             elif theta < 0: theta += 2*pi
@@ -100,10 +100,10 @@ class Player(pygame.sprite.Sprite):
             l2 = sqrt((x_end - self.rect.centerx)**2 + (y - self.rect.centery)**2)
             if l1 < l2:
                 endpos = (x, y_end)
-                lengths.append((l1 * cos(theta - self.angle), 0))
+                lengths.append((l1 * cos(theta - self.angle), 0, int(y_end % len(self.map.texture))))
             else:
                 endpos = (x_end, y)
-                lengths.append((l2 * cos(theta - self.angle), 1))
+                lengths.append((l2 * cos(theta - self.angle), 1, int(x_end % len(self.map.texture))))
 
             # pygame.draw.line(self.screen, "white", self.rect.center, endpos)
         # pygame.draw.line(self.screen, "black", self.rect.center, (self.rect.centerx + 50 * cos(self.angle), self.rect.centery + 50 * sin(self.angle)), width=1)
@@ -112,7 +112,14 @@ class Player(pygame.sprite.Sprite):
     def render(self, rays):
         for i in range(len(rays)):
             l = round(25 * RES[1] / (rays[i][0] + .0001))
-            pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
+            # pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
+            y_pos = MIDPT[1] - l
+            step = (2 * l) / len(self.map.texture[0])
+            # print(rays[i][2])
+            shading = 20 | (20 << 8) | (20 << 16)
+            for px in range(len(self.map.texture[0])):
+                pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * 2, int(y_pos)), (i * 2, int(y_pos + step)), width=2)
+                y_pos += step
 
     def draw(self):
         # self.raytrace()

@@ -37,6 +37,15 @@ class Map:
         #              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
         self.data = pygame.surfarray.array2d(pygame.image.load("assets/backroom.png").convert())
+        self.texture = pygame.surfarray.array2d(pygame.image.load("assets/default.png").convert())
+        for col in range(len(self.texture)):
+            for p in range(len(self.texture[col])):
+                if (self.texture[col][p] >> 16) < 20:
+                    self.texture[col][p] += 20 << 16
+                if ((self.texture[col][p] >> 8) & 255) < 20:
+                    self.texture[col][p] += 20 << 8
+                if (self.texture[col][p] & 255) < 20:
+                    self.texture[col][p] += 20
 
         self.screen = screen
 
