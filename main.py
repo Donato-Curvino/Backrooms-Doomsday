@@ -47,7 +47,7 @@ class Game:
 
 m = Map(screen)
 p = Player(screen, m)
-enemy = Enemy(screen, p, m)
+enemy = Sprite(screen, p, m)
 
 rgb, state = (255, 0, 0), 1
 chng = 0
