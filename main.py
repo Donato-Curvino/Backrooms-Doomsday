@@ -4,10 +4,12 @@ from components.map import *
 from components.constants import *
 # from components.enemytst import *
 # from components.sprite_object import *
-from components.game_screen import *
+import components.game_screen
+import time
 
 pygame.init()
 screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
+
 running = True
 clk = pygame.time.Clock()
 dt = 1
@@ -55,38 +57,26 @@ p = Player(screen, m)
 print(screen)
 # print(m.pic[0][0] & (255 << 8), 255 << 8)
 
+gs = components.game_screen
 state = 0
 
 while running:
-    while state == 0:
-        state = start_screen(screen)
-
-    if state == 1:
-        screen.fill((230, 230, 155))
-
-        p.move(dt)
-        m.draw(DEBUG)
-        p.draw(DEBUG)
-        # enemy.draw()
-
-        dt = clk.tick(60)
-        # print(dt)
-        pygame.display.flip()
-        # print(p.angle)
-        if p.win():
-            state = 4
-            print("You win!!")
-    elif state == 4:
-        state = end_screen(screen)
+    if state == 0 and gs.start_screen(screen):
+        state = gs.start_screen(screen)
+    elif state == 1 and gs.main_game(screen, p, m, clk, DEBUG, dt):
+        state = gs.main_game(screen, p, m, clk, DEBUG, dt)
+    elif state == 4 and gs.end_screen(screen):
+        running = False
 
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
             running = False
             pygame.quit()
-        if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
-            # pause
-            pass
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
+            state = 4
+            
+    pygame.display.update()
 
-# pygame.quit()
+pygame.quit()
 
