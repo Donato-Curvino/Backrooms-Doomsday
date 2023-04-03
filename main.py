@@ -1,81 +1,84 @@
 import pygame
+import components.game_screen
 from components.player import *
 from components.map import *
 from components.constants import *
-from components.enemytst import *
-from components.sprite_object import *
 
 pygame.init()
-screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
-running = True
-clk = pygame.time.Clock()
-dt = 1
-# DEBUG = False
 
+# Note: can change to 1920, by 1080 for completion
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 
-def rainbow(clr, st, incr=1):
-    r, g, b = clr
-    if st == 1:
-        if r > 0:
-            r -= incr
-            g += incr
-        else:
-            st = 2
-    if st == 2:
-        if g > 0:
-            g -= incr
-            b += incr
-        else:
-            st = 3
-    if st == 3:
-        if b > 0:
-            b -= incr
-            r += incr
-        else:
-            st = 1
-            r -= incr
-            g += incr
-    return (r, g, b), st
+screen = pygame.display.set_mode(RES)
 
+player = pygame.Rect((300, 250, 50, 50))
 
-class Game:
-    def __init__(self):
-        self.clock = pygame.time.Clock()
-        self.dt = 1     # initialize time
-        self.xyz = 1234
+#game variables
+game_start = False
+menu_state = "main"
 
+# #define fonts
+# font = pygame.font.SysFont("arialblack", 40)
 
+# #define colours
+# TEXT_COL = (255, 255, 255)
+
+# #load button images
+# resume_img = pygame.image.load("images/button_resume.png").convert_alpha()
+# quit_img = pygame.image.load("images/button_quit.png").convert_alpha()
+# back_img = pygame.image.load('images/button_back.png').convert_alpha()
+
+# #create button instances
+# resume_button = button.Button(304, 125, resume_img, 1)
+# quit_button = button.Button(336, 375, quit_img, 1)
+# back_button = button.Button(332, 450, back_img, 1)
+gs = components.game_screen
+state = 0
 m = Map(screen)
 p = Player(screen, m)
-enemy = Sprite(screen, p, m)
+clk = pygame.time.Clock()
+dt = 1
 
-rgb, state = (255, 0, 0), 1
-chng = 0
+run = True
+while run:
+    screen.fill((0, 0, 0))
+    key = pygame.key.get_pressed()
 
-print(screen)
-# print(m.pic[0][0] & (255 << 8), 255 << 8)
+    #check if game is paused
+    if state == 0 and gs.start_screen(screen):
+        state = gs.start_screen(screen)
+    # elif state == 1 and gs.main_game(screen, player, key):
+    #     state = gs.main_game(screen, player, key)
+    elif state == 1:
+        screen.fill((230, 230, 155))
 
+        p.move(dt)
+        m.draw(DEBUG)
+        p.draw(DEBUG)
+        # enemy.draw()
 
-while running:
-    rgb, state = rainbow(rgb, state, chng)
-    # print(rgb)
-    screen.fill((230, 230, 155))
+        dt = clk.tick(60)
+        # print(dt)
+        pygame.display.flip()
+        # print(p.angle)
+        if p.win():
+            state = 2
+            print("You win!!")
+    elif state == 2 and gs.end_screen(screen):
+        state = gs.end_screen(screen)
+    elif state == 4:
+        run = False
+        
 
-    p.move(dt)
-    # screen.blit(p.image, p.rect)
-    m.draw(DEBUG)
-    raycheck = p.draw(DEBUG)
-    enemy.draw(raycheck)
+    # game loop check for exit
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT  or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            run = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                game_start = True
 
-    dt = clk.tick(60)
-    # print(dt)
-    pygame.display.flip()
-    # print(p.angle)
+    pygame.display.update()
 
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
-            running = False
-            pygame.quit()
-
-# pygame.quit()
-
+pygame.quit()
