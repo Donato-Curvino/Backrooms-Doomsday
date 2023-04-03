@@ -2,9 +2,10 @@ import pygame
 from components.constants import *
 from math import ceil, sin, cos, pi, tan, sqrt, floor, ceil, atan2, tau, hypot
 
-class Sprite(pygame.sprite.Sprite):
-    
+
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, screen, player, map, path='assets/default.png', pos=(300, 350)):
+        pygame.sprite.Sprite.__init__(self)
         self.player = player
         self.dx, self.dy = (5, 0)
         #self.mapx = self.x // 25
@@ -54,7 +55,7 @@ class Sprite(pygame.sprite.Sprite):
         else:
             self.frames += 1
             
-        self.rel_angle = -(180 - ((self.angle - self.player.angle/DEG) + 90))
+        self.rel_angle = (180 - ((self.angle - self.player.angle/DEG) + 90))
         while self.rel_angle >= 360:
             self.rel_angle -= 360
         while self.rel_angle < 0:
@@ -88,17 +89,17 @@ class Sprite(pygame.sprite.Sprite):
             xo, yo = self.pos[0] - self.player.rect.centerx + self.dx, self.pos[1] - self.player.rect.centery + 20 + self.dy
             theta = atan2(yo, xo)
             if theta < 0: theta += 2 * pi
-            self.norm_dist = sqrt(xo**2 + yo**2) * cos(theta - self.player.angle)                
+            norm_dist = sqrt(xo**2 + yo**2) * cos(theta - self.player.angle)
             # print(self.player.angle - (pi / 6), theta, self.player.angle + (pi / 6))
             # print(self.rect.center)
-            #if True:
-            if (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and self.norm_dist > 0.25:
+            # if True:
+            if (not self.check_walls()) and (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
                 
 
-                l = round(25 * RES[1] / (self.norm_dist + .0001))
+                l = round(25 * RES[1] / (norm_dist + .0001))
                 step = (2 * l)
-                self.image = pygame.transform.scale(self.cp, (2 * round(self.size[0] * RES[1] / self.norm_dist), step))
-                print((2 * round(self.size[0] * RES[1] / self.norm_dist), step))
+                self.image = pygame.transform.scale(self.cp, (2 * round(self.size[0] * RES[1] / norm_dist), step))
+                # print((2 * round(self.size[0] * RES[1] / norm_dist), step))
                 
                 rectscreen = pygame.Rect(0, 0, 1, 1)
                 
@@ -106,6 +107,41 @@ class Sprite(pygame.sprite.Sprite):
                 self.image.set_colorkey((255, 255, 255))
                 self.screen.blit(self.image, rectscreen)
         
+    def check_walls(self):
+        if (self.pos[0] - self.player.rect.centerx) != 0:
+            m = (self.pos[1] - self.player.rect.centery) / (self.pos[0] - self.player.rect.centerx)
+
+            x0, y0 = self.pos
+            # y = mx + b
+            if self.pos[0] < self.player.rect.centerx:
+                while x0 < self.player.rect.centerx and (m*x0 + self.pos[1]) < (25*(len(self.map.data[0]))):
+                    if self.map.data[int(x0 // 25)][int((m*x0 + self.pos[1]) // 25)] == CLR_WALL:
+                        return True         # Hit wall
+                    x0 += 25
+            else:
+                while x0 > self.player.rect.centerx and (m*x0 + self.pos[1]) >= 0:
+                    if self.map.data[int(x0 // 25)][int((m*x0 + self.pos[1]) // 25)] == CLR_WALL:
+                        return True         # Hit wall
+                    x0 -= 25
+
+            # x = my + c
+            if m == 0: return False         # avoids unnecesary division by 0
+            m = (self.pos[0] - self.player.rect.centerx) / (self.pos[1] - self.player.rect.centery)
+            if self.pos[1] < self.player.rect.centery:
+                while y0 < self.player.rect.centery and (m*y0 + self.pos[0]) < (25*(len(self.map.data))):
+                    if self.map.data[int((m*y0 + self.pos[0]) // 25)][int(y0 // 25)] == CLR_WALL:
+                        return True
+                    y0 += 25
+            else:
+                while y0 > self.player.rect.centery and (m*y0 + self.pos[0]) >= 0:
+                    if self.map.data[int((m*y0 + self.pos[0]) // 25)][int(y0 // 25)] == CLR_WALL:
+                        return True
+                    y0 -= 25
+
+            return False        # no walls hit
+
+
+
     def ray_trace(self):
         
         #TODO: 10 rays, which the monster uses to see
