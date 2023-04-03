@@ -64,8 +64,8 @@ while running:
     p.move(dt)
     # screen.blit(p.image, p.rect)
     m.draw(DEBUG)
-    p.draw(DEBUG)
-    enemy.draw()
+    raycheck = p.draw(DEBUG)
+    enemy.draw(raycheck)
 
     dt = clk.tick(60)
     # print(dt)
