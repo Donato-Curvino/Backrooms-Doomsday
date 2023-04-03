@@ -36,7 +36,7 @@ class Map:
         #              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         #              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
-        self.data = pygame.surfarray.array2d(pygame.image.load("assets/backroom.png").convert())
+        self.data = pygame.surfarray.array2d(pygame.image.load("assets/backrooms1.png").convert())
         self.texture = pygame.surfarray.array2d(pygame.image.load("assets/backwall.png").convert())
         for col in range(len(self.texture)):
             for p in range(len(self.texture[col])):
