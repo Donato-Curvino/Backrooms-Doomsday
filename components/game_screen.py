@@ -1,18 +1,6 @@
 import pygame
 import button
-
-def set_images(screen):
-	#load button images
-	resume_img = pygame.image.load("images/button_resume.png").convert_alpha()
-	quit_img = pygame.image.load("images/button_quit.png").convert_alpha()
-	monster = pygame.image.load("images/monster.png")
-	monster = pygame.transform.scale(monster, (800, 600))
-
-	#create button instances
-	resume_button = button.Button(304, 125, resume_img, 1)
-	quit_button = button.Button(336, 375, quit_img, 1)
-
-	return resume_button, quit_button, monster
+import os
 
 def draw_text(screen, text, font, text_col, x, y):
 	img = font.render(text, True, text_col)
@@ -20,16 +8,25 @@ def draw_text(screen, text, font, text_col, x, y):
 
 def start_screen(screen):
 	
-	resume_button, quit_button, monster = set_images(screen)
+	#load button images
+	start_img = pygame.image.load("assets/button_start.png").convert_alpha()
+	quit_img = pygame.image.load("assets/button_quit.png").convert_alpha()
+	monster = pygame.image.load("assets/monster.png")
+	monster = pygame.transform.scale(monster, (800, 600))
+
+	#create button instances
+	start_button = button.Button(20, 200, start_img, 1) # 308
+	quit_button = button.Button(20, 400, quit_img, 1) # 310
 
 	screen.blit(monster, (0, 0))
-	if resume_button.draw(screen):
+	if start_button.draw(screen):
 		print("resume button pressed")
 		return 1
 	if quit_button.draw(screen):
 		print("quit button pressed")
 		return 4
-	draw_text(screen, "Backrooms: Doomsday", pygame.font.SysFont("arialblack", 40), (255, 255, 255), 20, 10)
+	draw_text(screen, "Backrooms", pygame.font.SysFont("arialblack", 60), (255, 255, 0), 20, 10)
+	draw_text(screen, "Doomsday", pygame.font.SysFont("arialblack", 60), (255, 255, 0), 20, 80)
 
 
 def main_game(screen, player, key):
@@ -42,16 +39,21 @@ def main_game(screen, player, key):
         player.move_ip(0, -1)
     elif key[pygame.K_s] == True:
         player.move_ip(0, 1)
-    elif key[pygame.K_l] == True:
-	    return 4
-
+    elif key[pygame.K_k] == True:
+	    return 2
+    
 def end_screen(screen):
-	resume_button, quit_button, monster = set_images(screen)
+	again_img = pygame.image.load("assets/button_again.png").convert_alpha()
+	quit_img = pygame.image.load("assets/button_quit.png").convert_alpha()
+
+	#create button instances
+	again_button = button.Button(246, 200, again_img, 1) # 308
+	quit_button = button.Button(247, 400, quit_img, 1) # 310
+
+	# again_button = button.Button(, 200, again_img, 1)
 	
-	if resume_button.draw(screen):
+	if again_button.draw(screen):
 		return 1
 	if quit_button.draw(screen):
 		return 4
-	else:
-		return 0
-	draw_text(screen, "Backrooms: Doomsday", pygame.font.SysFont("arialblack", 40), (255, 255, 255), 20, 10)
+	draw_text(screen, "You Died", pygame.font.SysFont("arialblack", 80), (255, 255, 0), 200, 20)
