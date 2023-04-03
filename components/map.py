@@ -37,7 +37,7 @@ class Map:
         #              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
         self.data = pygame.surfarray.array2d(pygame.image.load("assets/backroom.png").convert())
-        self.texture = pygame.surfarray.array2d(pygame.image.load("assets/creeper.png").convert())
+        self.texture = pygame.surfarray.array2d(pygame.image.load("assets/backwall.png").convert())
         for col in range(len(self.texture)):
             for p in range(len(self.texture[col])):
                 if (self.texture[col][p] >> 16) < 20:

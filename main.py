@@ -2,13 +2,15 @@ import pygame
 from components.player import *
 from components.map import *
 from components.constants import *
+from components.enemytst import *
+from components.sprite_object import *
 
 pygame.init()
 screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
 running = True
 clk = pygame.time.Clock()
 dt = 1
-DEBUG = True
+# DEBUG = False
 
 
 def rainbow(clr, st, incr=1):
@@ -45,6 +47,7 @@ class Game:
 
 m = Map(screen)
 p = Player(screen, m)
+enemy = Enemy(screen, p, m)
 
 rgb, state = (255, 0, 0), 1
 chng = 0
@@ -56,12 +59,13 @@ print(screen)
 while running:
     rgb, state = rainbow(rgb, state, chng)
     # print(rgb)
-    screen.fill((0, 0, 100))
+    screen.fill((230, 230, 155))
 
     p.move(dt)
     # screen.blit(p.image, p.rect)
     m.draw(DEBUG)
     p.draw(DEBUG)
+    enemy.draw()
 
     dt = clk.tick(60)
     # print(dt)

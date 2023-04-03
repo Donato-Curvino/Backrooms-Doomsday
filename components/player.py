@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         # tan = y/x => x = 25 cot
         lengths = []
 
-        for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0] // 2):
+        for i in numpy.linspace(-FOV_ANGLE, FOV_ANGLE, RES[0] // QUALITY):
             theta = i*DEG + self.angle
             if theta >= (2*pi): theta -= 2*pi
             elif theta < 0: theta += 2*pi
@@ -118,7 +118,7 @@ class Player(pygame.sprite.Sprite):
             # print(rays[i][2])
             shading = 20 | (20 << 8) | (20 << 16)
             for px in range(len(self.map.texture[0])):
-                pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * 2, int(y_pos)), (i * 2, int(y_pos + step)), width=2)
+                pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * QUALITY, int(y_pos)), (i * QUALITY, int(y_pos + step)), width=QUALITY)
                 y_pos += step
 
     def draw(self, DEBUG):
