@@ -16,9 +16,9 @@ class Player(pygame.sprite.Sprite):
         # subclass initialization
         # self.rect.x = 250
         # self.rect.y = 250
-        self.rect.center = (312, 500)
+        self.rect.center = (75, 75)
         self.speed = 25
-        self.angle = 270 * DEG
+        self.angle = 90 * DEG
 
         # graphics initialization
         self.screen = screen
@@ -27,11 +27,11 @@ class Player(pygame.sprite.Sprite):
         # helper class initialization
         self.map = map
 
-    def collide(self, pos, r=True, d=True):
+    def collide(self, pos, c=CLR_WALL):
         xpos = int(int(pos[0]) / 25)
         ypos = int(int(pos[1]) / 25)
         # print(pos)
-        return self.map.data[xpos][ypos] == CLR_WALL
+        return self.map.data[xpos][ypos] == c
 
     def move(self, dt):
         keys = pygame.key.get_pressed()
@@ -81,7 +81,7 @@ class Player(pygame.sprite.Sprite):
             if right: x += 25
             y_end = (abs(self.rect.centerx - x) / 25) * dy + self.rect.centery if dx != 0 else 10000000
 
-            while (0 <= y_end < (25 * len(self.map.data))) and (0 <= x < (25 * len(self.map.data[0]))) and (not self.collide((x - (0 if right else 25), y_end), right, down)):
+            while (0 <= y_end < (25 * len(self.map.data))) and (0 <= x < (25 * len(self.map.data[0]))) and (not self.collide((x - (0 if right else 25), y_end))):
                 x = (x + 25) if right else (x - 25)
                 y_end += dy
 
@@ -90,7 +90,7 @@ class Player(pygame.sprite.Sprite):
             if down: y += 25
             x_end = (abs(self.rect.centery - y) / 25) * dx + self.rect.centerx if dy != 0 else 10000000
 
-            while 0 <= x_end < (25 * len(self.map.data[0])) and (0 <= y <= (25 * len(self.map.data))) and not self.collide((x_end, y - (0 if down else 25)), right, down):
+            while 0 <= x_end < (25 * len(self.map.data[0])) and (0 <= y <= (25 * len(self.map.data))) and not self.collide((x_end, y - (0 if down else 25))):
                 y = (y + 25) if down else (y - 25)
                 x_end += dx
 
@@ -123,9 +123,13 @@ class Player(pygame.sprite.Sprite):
                 pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * QUALITY, int(y_pos)), (i * QUALITY, int(y_pos + step)), width=QUALITY)
                 y_pos += step
         return raycheck
+
     def draw(self, DEBUG):
         if DEBUG:
             self.raytrace(DEBUG)
             self.screen.blit(self.image, self.rect)
         else:
             return self.render(self.raytrace())
+
+    def win(self):
+        return True if self.collide(self.rect.center, CLR_WIN) else False

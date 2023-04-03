@@ -2,8 +2,9 @@ import pygame
 from components.player import *
 from components.map import *
 from components.constants import *
-from components.enemytst import *
-from components.sprite_object import *
+# from components.enemytst import *
+# from components.sprite_object import *
+from components.game_screen import *
 
 pygame.init()
 screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
@@ -13,6 +14,7 @@ dt = 1
 # DEBUG = False
 
 
+# unused in final build
 def rainbow(clr, st, incr=1):
     r, g, b = clr
     if st == 1:
@@ -47,35 +49,44 @@ class Game:
 
 m = Map(screen)
 p = Player(screen, m)
-enemy = Sprite(screen, p, m)
+# enemy = Enemy(screen, p, m)
 
-rgb, state = (255, 0, 0), 1
-chng = 0
 
 print(screen)
 # print(m.pic[0][0] & (255 << 8), 255 << 8)
 
+state = 0
 
 while running:
-    rgb, state = rainbow(rgb, state, chng)
-    # print(rgb)
-    screen.fill((230, 230, 155))
+    while state == 0:
+        state = start_screen(screen)
 
-    p.move(dt)
-    # screen.blit(p.image, p.rect)
-    m.draw(DEBUG)
-    raycheck = p.draw(DEBUG)
-    enemy.draw(raycheck)
+    if state == 1:
+        screen.fill((230, 230, 155))
 
-    dt = clk.tick(60)
-    # print(dt)
-    pygame.display.flip()
-    # print(p.angle)
+        p.move(dt)
+        m.draw(DEBUG)
+        p.draw(DEBUG)
+        # enemy.draw()
+
+        dt = clk.tick(60)
+        # print(dt)
+        pygame.display.flip()
+        # print(p.angle)
+        if p.win():
+            state = 4
+            print("You win!!")
+    elif state == 4:
+        state = end_screen(screen)
+
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
             running = False
             pygame.quit()
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
+            # pause
+            pass
 
 # pygame.quit()
 
