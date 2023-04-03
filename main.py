@@ -5,7 +5,6 @@ from components.constants import *
 # from components.enemytst import *
 # from components.sprite_object import *
 import components.game_screen
-import time
 
 pygame.init()
 screen = pygame.display.set_mode(RES, flags=pygame.RESIZABLE | pygame.SCALED)
@@ -66,6 +65,8 @@ while running:
     elif state == 1 and gs.main_game(screen, p, m, clk, DEBUG, dt):
         state = gs.main_game(screen, p, m, clk, DEBUG, dt)
     elif state == 4 and gs.end_screen(screen):
+        state = gs.end_screen(screen)
+    elif state == 3:
         running = False
 
 
