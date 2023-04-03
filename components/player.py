@@ -110,6 +110,7 @@ class Player(pygame.sprite.Sprite):
         return lengths
 
     def render(self, rays):
+        raycheck = []
         for i in range(len(rays)):
             l = round(25 * RES[1] / (rays[i][0] + .0001))
             # pygame.draw.line(self.screen, (100 - 20*rays[i][1], 0, 0), (i, MIDPT[1] - l), (i, MIDPT[1] + l))
@@ -118,12 +119,13 @@ class Player(pygame.sprite.Sprite):
             # print(rays[i][2])
             shading = 20 | (20 << 8) | (20 << 16)
             for px in range(len(self.map.texture[0])):
+                raycheck.append((i*2, rays[i][0]))
                 pygame.draw.line(self.screen, int(self.map.texture[rays[i][2]][px] - (shading * rays[i][1])), (i * QUALITY, int(y_pos)), (i * QUALITY, int(y_pos + step)), width=QUALITY)
                 y_pos += step
-
+        return raycheck
     def draw(self, DEBUG):
         if DEBUG:
             self.raytrace(DEBUG)
             self.screen.blit(self.image, self.rect)
         else:
-            self.render(self.raytrace())
+            return self.render(self.raytrace())
