@@ -3,6 +3,7 @@ import components.game_screen
 from components.player import *
 from components.map import *
 from components.constants import *
+from components.sprite_object import *
 
 pygame.init()
 
@@ -38,6 +39,7 @@ state = 0
 m = Map(screen)
 p = Player(screen, m)
 clk = pygame.time.Clock()
+enemy = Enemy(screen, p, m)
 dt = 1
 
 run = True
@@ -56,7 +58,7 @@ while run:
         p.move(dt)
         m.draw(DEBUG)
         p.draw(DEBUG)
-        # enemy.draw()
+        enemy.draw()
 
         dt = clk.tick(60)
         # print(dt)

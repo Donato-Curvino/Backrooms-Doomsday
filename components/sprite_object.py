@@ -93,8 +93,8 @@ class Enemy(pygame.sprite.Sprite):
             # print(self.player.angle - (pi / 6), theta, self.player.angle + (pi / 6))
             # print(self.rect.center)
             # if True:
-            if (not self.check_walls()) and (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
-                
+            # if (not self.check_walls()) and (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
+            if (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
 
                 l = round(25 * RES[1] / (norm_dist + .0001))
                 step = (2 * l)

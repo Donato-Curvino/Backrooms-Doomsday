@@ -1,7 +1,7 @@
 from numpy import pi, array
 from math import tan
 
-RES = (1280, 720)
+RES = (800, 600)
 MIDPT = (RES[0] // 2, RES[1] // 2)
 DEG = pi / 180
 FOV_ANGLE = 30
