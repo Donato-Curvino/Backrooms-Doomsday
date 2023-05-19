@@ -69,7 +69,7 @@ if __name__ == "__main__":
             pygame.surfarray.pixels2d(screen)[:] = pool.map(p.draw_line, ANGLES)
             enemy.draw()
 
-            dt = clk.tick(60)
+            dt = clk.tick()
             # print(dt)
             pygame.display.set_caption(f"{clk.get_fps():.1f}")
             pygame.display.flip()
