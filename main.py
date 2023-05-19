@@ -1,5 +1,5 @@
 import pygame
-import multiprocessing
+from multiprocessing import Pool
 import components.game_screen
 from components.player import *
 from components.map import *
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     enemy = Enemy(screen, p, m)
     dt = 1
 
-    pool = multiprocessing.Pool()
+    pool = Pool()
 
     run = True
     while run:
@@ -63,7 +63,10 @@ if __name__ == "__main__":
 
             p.move(dt)
             m.draw(DEBUG)
-            p.draw(screen, pool.map(p.raytrace, ANGLES), p_img)
+            # p.draw(screen, pool.map(p.raytrace, ANGLES), p_img)
+            rays = pool.map(p.raytrace, ANGLES)
+            pygame.surfarray.pixels2d(screen)[:] = pool.map(p.render_line, rays)
+            # pygame.surfarray.pixels2d(screen)[:] = list(map(p.render_line, rays))
             enemy.draw()
 
             dt = clk.tick(60)

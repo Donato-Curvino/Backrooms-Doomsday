@@ -1,5 +1,5 @@
 import pygame
-import numpy
+import numpy as np
 from math import ceil, sin, cos, pi, tan, sqrt, floor, ceil
 
 from components.map import *
@@ -149,6 +149,19 @@ class Player:
     def win(self):
         return True if self.collide(self.rect.center, CLR_WIN) else False
 
+    def render_line(self, ray):
+        l = round(25 * RES[1] / (ray[0] + .0001))
+        y_pos = MIDPT[1] - l
+        tex = ray[3]
+        step = (2 * l) / len(self.map_texture[tex][0])
+        shading = 20 | (20 << 8) | (20 << 16)
+        iQ, shr = 1 * QUALITY, shading * ray[1]
+
+        col = np.full(RES[1], CLR_BACKGROUND, dtype=np.uint32)
+        for px in range(len(self.map_texture[tex][0])):
+            col[max(int(y_pos), 0): int(y_pos + step)].fill(int(self.map_texture[tex][ray[2]][px] - shr))
+            if (y_pos := y_pos + step) > len(col): break
+        return col
 
 # class MultiTracer(multiprocessing.Pool):
 #     def __init__(self, p, *args, **kwargs):
