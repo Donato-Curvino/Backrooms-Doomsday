@@ -163,6 +163,9 @@ class Player:
             if (y_pos := y_pos + step) > len(col): break
         return col
 
+    def draw_line(self, angle):
+        return self.render_line(self.raytrace(angle))
+
 # class MultiTracer(multiprocessing.Pool):
 #     def __init__(self, p, *args, **kwargs):
 #         multiprocessing.Pool.__init__(self, *args, **kwargs)
