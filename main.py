@@ -63,17 +63,15 @@ if __name__ == "__main__":
 
             p.move(dt)
             m.draw(DEBUG)
-            # p.draw(screen, pool.map(p.raytrace, ANGLES), p_img)
             # rays = pool.map(p.raytrace, ANGLES)
             # pygame.surfarray.pixels2d(screen)[:] = pool.map(p.render_line, rays)
-            pygame.surfarray.pixels2d(screen)[:] = pool.map(p.draw_line, ANGLES)
+            if DEBUG: p.draw(screen, pool.map(p.raytrace, ANGLES), p_img)
+            else: pygame.surfarray.pixels2d(screen)[:] = pool.map(p.draw_line, ANGLES)
             enemy.draw()
 
             dt = clk.tick()
-            # print(dt)
-            pygame.display.set_caption(f"{clk.get_fps():.1f}")
+            pygame.display.set_caption(f"FPS: {clk.get_fps():.1f}")
             pygame.display.flip()
-            # print(p.angle)
             if p.win():
                 state = 2
                 print("You win!!")
