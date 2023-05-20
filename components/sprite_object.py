@@ -4,13 +4,13 @@ from math import ceil, sin, cos, pi, tan, sqrt, floor, ceil, atan2, tau, hypot
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, screen, player, map, path='assets/default.png', pos=(300, 350)):
+    def __init__(self, screen, player, map, pos=(300, 350), path='assets/default.png'):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
         self.dx, self.dy = (5, 0)
-        #self.mapx = self.x // 25
-        #self.mapy = self.y // 25
-        #self.mappos = self.mapx, self.map
+        # self.mapx = self.x // 25
+        # self.mapy = self.y // 25
+        # self.mappos = self.mapx, self.map
         self.screen = screen
         self.map = map
         self.image = pygame.image.load(path).convert_alpha()
@@ -25,16 +25,22 @@ class Enemy(pygame.sprite.Sprite):
         self.angle = 0
         self.rel_angle = 0
         self.speed = 0
-        
+
+        if not hasattr(Enemy, "sprites"):
+            Enemy.sprites = self.load_assets()
+            print("loading...")
+        else:
+            print("already loaded!")
+
     def draw(self):
         if DEVMAP == 1:
             pygame.draw.rect(self.screen, "red", (self.rect.center, (10, 10)))
-            #self.rect.x = self.rect.centerx
-            #self.rect.y = self.rect.centery
+            # self.rect.x = self.rect.centerx
+            # self.rect.y = self.rect.centery
             self.screen.blit(self.image, self.rect)
-            
-        #self.move()
-        
+
+        # self.move()
+
         if self.mode == 1:
             top = 20
             self.speed = 10
@@ -44,7 +50,9 @@ class Enemy(pygame.sprite.Sprite):
         if self.mode == 3:
             top = 5
             self.speed = 16
-        
+        else:
+            top = 20
+
         if self.frames >= top:
             self.frames = 0
             if self.i >= 3:
@@ -54,37 +62,38 @@ class Enemy(pygame.sprite.Sprite):
                 self.i += 1
         else:
             self.frames += 1
-            
+
         self.rel_angle = (180 - ((self.angle - self.player.angle/DEG) + 90))
         while self.rel_angle >= 360:
             self.rel_angle -= 360
         while self.rel_angle < 0:
             self.rel_angle += 360
-            
+
         if self.flip == 1:
             image_angle = self.rel_angle
         else:
             image_angle = 180 - self.rel_angle
             if image_angle < 0:
                 image_angle += 360
-        
+
         for i in range(0, 360+45, 45):
-            if image_angle >= i-(45/2) and image_angle <= i+(45/2):
+            if i-(45 / 2) <= image_angle <= i+(45 / 2):
                 image_angle = i
-        
-        if(image_angle >= 360):
+
+        if image_angle >= 360:
             image_angle -= 360
-        
-        #pos = self.rect.center
-        self.image = pygame.image.load('assets/walk/' + str(image_angle) + '_' + str(self.i) + '.png')
+
+        # pos = self.rect.center
+        # self.image = pygame.image.load('assets/walk/' + str(image_angle) + '_' + str(self.i) + '.png')
         # self.rect = self.image.get_rect()
         # self.rect.center = pos
+        self.image = Enemy.sprites[str(image_angle) + '_' + str(self.i)].copy()
         if self.flip == -1:
             self.image = pygame.transform.flip(self.image, True, False)
-        self.cp = self.image.copy()  # holds og for transformation
+        # self.cp = self.image.copy()  # holds og for transformation
 
         # 3D rendering -------------------------------------------------------------------------------------------------
-        
+
         if DEVMAP != 1:
             xo, yo = self.pos[0] - self.player.rect.centerx + self.dx, self.pos[1] - self.player.rect.centery + 20 + self.dy
             theta = atan2(yo, xo)
@@ -98,15 +107,15 @@ class Enemy(pygame.sprite.Sprite):
 
                 l = round(25 * RES[1] / (norm_dist + .0001))
                 step = (2 * l)
-                self.image = pygame.transform.scale(self.cp, (2 * round(self.size[0] * RES[1] / norm_dist), step))
+                self.image = pygame.transform.scale(self.image, (2 * round(self.size[0] * RES[1] / norm_dist), step))
                 # print((2 * round(self.size[0] * RES[1] / norm_dist), step))
-                
+
                 rectscreen = pygame.Rect(0, 0, 1, 1)
-                
+
                 rectscreen.center = (RES[0] * (theta - (self.player.angle - (pi / 6))) / (pi / 3) - self.image.get_width()//2, MIDPT[1]-l+10)
                 self.image.set_colorkey((255, 255, 255))
                 self.screen.blit(self.image, rectscreen)
-        
+
     def check_walls(self):
         if (self.pos[0] - self.player.rect.centerx) != 0:
             m = (self.pos[1] - self.player.rect.centery) / (self.pos[0] - self.player.rect.centerx)
@@ -125,7 +134,7 @@ class Enemy(pygame.sprite.Sprite):
                     x0 -= 25
 
             # x = my + c
-            if m == 0: return False         # avoids unnecesary division by 0
+            if m == 0: return False         # avoids unnecessary division by 0
             m = (self.pos[0] - self.player.rect.centerx) / (self.pos[1] - self.player.rect.centery)
             if self.pos[1] < self.player.rect.centery:
                 while y0 < self.player.rect.centery and (m*y0 + self.pos[0]) < (25*(len(self.map.data))):
@@ -140,16 +149,24 @@ class Enemy(pygame.sprite.Sprite):
 
             return False        # no walls hit
 
-
-
     def ray_trace(self):
-        
-        #TODO: 10 rays, which the monster uses to see
-        #TODO: line, which connects monster and player. if line is unobstructed, monster in mode 1 slowly moves toward the player
+
+        # TODO: 10 rays, which the monster uses to see
+        # TODO: line, which connects monster and player. if line is unobstructed, monster in mode 1 slowly moves toward the player
         #      in mode 2, monster quickly moves toward player. in mode 3, monster wants to lengthen line and obstruct view
-        #TODO: usage of rays: 
-        
+        # TODO: usage of rays:
+
         pass
-        
-#line between sprite and player
-#if there is an object between player and sprite do not render
+
+# line between sprite and player
+# if there is an object between player and sprite do not render
+    @staticmethod
+    def load_assets():
+        sprites = dict()
+        for i in range(0, 360, 45):
+            for o in range(1, 4):
+                sprites[str(i) + '_' + str(o)] = pygame.image.load("assets/walk/" + str(i) + "_" + str(o) + ".png").convert_alpha()
+        return sprites
+
+
+
