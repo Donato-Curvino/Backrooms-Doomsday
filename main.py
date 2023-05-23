@@ -41,9 +41,11 @@ if __name__ == "__main__":
     state = 0
     m = Map(screen)
     p_img = pygame.image.load("assets/arrow.png").convert_alpha()
+    # heights = Array("i", RES[0], lock=False)
     p = Player(m, p_img)
     clk = pygame.time.Clock()
-    enemy = Enemy(screen, p, m)
+    enemy = Enemy(screen, p, m, (300, 275))
+    (enemy2 := Enemy(screen, p, m, (875, 1050))).angle = 90
     dt = 1
 
     pool = Pool()
@@ -66,8 +68,13 @@ if __name__ == "__main__":
             # rays = pool.map(p.raytrace, ANGLES)
             # pygame.surfarray.pixels2d(screen)[:] = pool.map(p.render_line, rays)
             if DEBUG: p.draw(screen, pool.map(p.raytrace, ANGLES), p_img)
-            else: pygame.surfarray.pixels2d(screen)[:] = pool.map(p.draw_line, ANGLES)
+            else:
+                temp = np.array(pool.map(p.draw_line, ANGLES))
+                pygame.surfarray.pixels2d(screen)[:] = temp[:, :RES[1]]
+                m.heights = temp[:, -1]
+            # print(heights[:])
             enemy.draw()
+            enemy2.draw()
 
             dt = clk.tick()
             pygame.display.set_caption(f"FPS: {clk.get_fps():.1f}")
@@ -82,7 +89,7 @@ if __name__ == "__main__":
 
         # game loop check for exit
         for event in pygame.event.get():
-            if event.type == pygame.QUIT  or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:

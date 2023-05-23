@@ -1,6 +1,6 @@
 import pygame
 from components.constants import *
-from math import ceil, sin, cos, pi, tan, sqrt, floor, ceil, atan2, tau, hypot
+from math import ceil, sin, cos, pi, tan, sqrt, floor, atan2, tau, hypot
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -110,11 +110,65 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = pygame.transform.scale(self.image, (2 * round(self.size[0] * RES[1] / norm_dist), step))
                 # print((2 * round(self.size[0] * RES[1] / norm_dist), step))
 
-                rectscreen = pygame.Rect(0, 0, 1, 1)
+                # rectscreen = pygame.Rect(0, 0, 1, 1)
+                self.rect.size = self.image.get_size()
 
-                rectscreen.center = (RES[0] * (theta - (self.player.angle - (pi / 6))) / (pi / 3) - self.image.get_width()//2, MIDPT[1]-l+10)
-                self.image.set_colorkey((255, 255, 255))
-                self.screen.blit(self.image, rectscreen)
+                self.rect.x, self.rect.y = (RES[0] * (theta - (self.player.angle - (pi / 6))) / (pi / 3) - self.image.get_width()//2, MIDPT[1]-l)
+                # self.image.set_colorkey((255, 255, 255))
+                # self.screen.blit(self.image, self.rect)
+                # pygame.draw.rect(self.screen, "red", (self.rect.center, (20, 20)))
+
+                on_screen = (self.rect.right > 0) and (self.rect.left <= RES[0])
+                if on_screen:
+                    prev_x, prev_y = self.rect.x, self.rect.y
+                    # print(self.rect)
+                    # self.rect.x, self.rect.y = max(0, self.rect.x), max(0, self.rect.y)
+                    if 0 <= (RES[0] - self.rect.x) < self.rect.w:                   # right side off screen
+                        self.rect.w = max(0, RES[0] - self.rect.x)
+                        # print("right")
+                    if self.rect.left < 0 and self.rect.right >= 0:                 # left side off screen
+                        self.rect.w = self.rect.right
+                        self.rect.left = 0
+                        # print("left")
+                    if self.rect.top < 0 and self.rect.bottom >= 0:                 # top side off screen
+                        self.rect.h = self.rect.bottom
+                        self.rect.top = 0
+                    if self.rect.bottom >= RES[1] > self.rect.top:                  # bottom side off screen
+                        self.rect.h = RES[1] - self.rect.top
+
+                    if 0 <= (RES[1] - self.rect.y) < self.rect.h:
+                        self.rect.h = max(0, RES[1] - self.rect.y)
+
+                    x_offset, y_offset = self.rect.x - prev_x, self.rect.y - prev_y
+
+                    # hgt_mask = self.map.heights[self.rect.x: self.rect.x + self.rect.w] > self.rect.y
+                    # print(self.rect)
+                    scr = pygame.surfarray.pixels2d(self.screen.subsurface(self.rect))
+                    r = pygame.Rect((x_offset, y_offset), self.rect.size)
+                    # print(r)
+                    img = pygame.surfarray.pixels2d(self.image.subsurface(r))
+                    hgt_mask = self.map.heights[self.rect.x: self.rect.right] > self.rect.y
+                    sprite_mask = img != 0
+                    # print(len(hgt_mask), len(sprite_mask))
+                    for i, m in enumerate(hgt_mask):
+                        if not m: sprite_mask[i] = False
+
+                    scr[sprite_mask] = img[sprite_mask]
+
+                # if RES[0] - self.rect.x <= self.rect.w:
+                #     scr = pygame.surfarray.pixels2d(self.screen.subsurface(self.rect))
+
+                # scr = None
+                # img = pygame.surfarray.pixels2d(self.image)
+
+                # for x in range(max(self.rect.x, 0), min(self.rect.right, RES[0]) - 1):
+                #     if True or self.rect.y <= heights[x]:
+                #         mask = img != 0
+                #         scr[mask] = img[mask]
+
+                        # for y in range(max(self.rect.y, 0), min(self.rect.bottom, RES[1]) - 1):
+                        #     if ((scr[x][y] >> 24) & 255) == 255:
+                        #         scr[x][y] = img[x - self.rect.x][y - self.rect.y] & CLR_W
 
     def check_walls(self):
         if (self.pos[0] - self.player.rect.centerx) != 0:
@@ -160,13 +214,17 @@ class Enemy(pygame.sprite.Sprite):
 
 # line between sprite and player
 # if there is an object between player and sprite do not render
+
     @staticmethod
     def load_assets():
         sprites = dict()
         for i in range(0, 360, 45):
             for o in range(1, 4):
                 sprites[str(i) + '_' + str(o)] = pygame.image.load("assets/walk/" + str(i) + "_" + str(o) + ".png").convert_alpha()
+
+        if DEBUG:
+            tst = pygame.surfarray.array2d((pygame.image.load("assets/walk/tst.png").convert_alpha()))
+            print(tst.dtype)
+            clr = tst[1][2]
+            print((clr >> 24) & 255, "<< 24 |", (clr >> 16) & 255, "<< 16 |", (clr >> 8) & 255, "<< 8 |", clr & 255)
         return sprites
-
-
-
