@@ -98,12 +98,18 @@ class Enemy(pygame.sprite.Sprite):
             xo, yo = self.pos[0] - self.player.rect.centerx + self.dx, self.pos[1] - self.player.rect.centery + 20 + self.dy
             theta = atan2(yo, xo)
             if theta < 0: theta += 2 * pi
+            if theta > (2*pi): theta %= 2*pi
             norm_dist = sqrt(xo**2 + yo**2) * cos(theta - self.player.angle)
             # print(self.player.angle - (pi / 6), theta, self.player.angle + (pi / 6))
             # print(self.rect.center)
             # if True:
             # if (not self.check_walls()) and (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
-            if (self.player.angle - (pi / 3)) < theta < (self.player.angle + (pi / 3)) and norm_dist > 0.25:
+            fov_top, fov_bottom = self.player.angle + FOV_ANGLE*DEG, self.player.angle - FOV_ANGLE*DEG
+            if fov_top > 2*pi: in_view = theta < fov_top % (2*pi) or theta >= fov_bottom
+            elif fov_bottom < 0: in_view = theta >= fov_bottom % (2*pi) or theta < fov_top
+            else: in_view = fov_bottom <= theta < fov_top
+
+            if in_view and norm_dist > 0.25:
 
                 l = round(25 * RES[1] / (norm_dist + .0001))
                 step = (2 * l)
@@ -113,13 +119,14 @@ class Enemy(pygame.sprite.Sprite):
                 # rectscreen = pygame.Rect(0, 0, 1, 1)
                 self.rect.size = self.image.get_size()
 
-                self.rect.x, self.rect.y = (RES[0] * (theta - (self.player.angle - (pi / 6))) / (pi / 3) - self.image.get_width()//2, MIDPT[1]-l)
+                self.rect.x, self.rect.y = RES[0] * ((theta - (self.player.angle - pi/6)) % (2*pi)) / (pi / 3) - self.image.get_width()//2, MIDPT[1]-l
                 # self.image.set_colorkey((255, 255, 255))
                 # self.screen.blit(self.image, self.rect)
                 # pygame.draw.rect(self.screen, "red", (self.rect.center, (20, 20)))
 
                 on_screen = (self.rect.right > 0) and (self.rect.left <= RES[0])
                 if on_screen:
+                    # print("good", self.rect, theta, self.player.angle - pi/6)
                     prev_x, prev_y = self.rect.x, self.rect.y
                     # print(self.rect)
                     # self.rect.x, self.rect.y = max(0, self.rect.x), max(0, self.rect.y)
@@ -154,6 +161,10 @@ class Enemy(pygame.sprite.Sprite):
                         if not m: sprite_mask[i] = False
 
                     scr[sprite_mask] = img[sprite_mask]
+                # else:
+                #     print("!!!", self.rect, theta, self.player.angle - pi/6, (theta - (self.player.angle - pi/6)))
+            # else:
+                # print(theta, self.player.angle)
 
                 # if RES[0] - self.rect.x <= self.rect.w:
                 #     scr = pygame.surfarray.pixels2d(self.screen.subsurface(self.rect))
