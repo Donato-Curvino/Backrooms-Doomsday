@@ -1,16 +1,18 @@
 import pygame
 from components.constants import *
-from math import ceil, sin, cos, pi, tan, sqrt, floor, atan2, tau, hypot
-
+from components.sound import *
+import random
+from math import ceil, sin, cos, pi, tan, sqrt, floor, ceil, atan2, tau, hypot, atan
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, screen, player, map, pos=(300, 350), path='assets/default.png'):
-        pygame.sprite.Sprite.__init__(self)
+    
+    def __init__(self, screen, player, map, sound, path='assets/default.png', pos=(1500, 1500)):
         self.player = player
-        self.dx, self.dy = (5, 0)
-        # self.mapx = self.x // 25
-        # self.mapy = self.y // 25
-        # self.mappos = self.mapx, self.map
+        self.sound = sound
+        self.dx, self.dy = (0, 0)
+        #self.mapx = self.x // 25
+        #self.mapy = self.y // 25
+        #self.mappos = self.mapx, self.map
         self.screen = screen
         self.map = map
         self.image = pygame.image.load(path).convert_alpha()
@@ -21,17 +23,31 @@ class Enemy(pygame.sprite.Sprite):
         self.i = 1
         self.flip = 1
         self.frames = 0
-        self.mode = 3
+        self.mode = 1
         self.angle = 0
         self.rel_angle = 0
         self.speed = 0
-
+        self.prevRow = 9
+        self.prevCol = 9
+        self.currRow = 9
+        self.currCol = 9
+        self.xo = 0
+        self.yo = 0
+        self.desiredSpot = 0
+        self.moveIn = False
+        self.decide = True
+        self.visible = False
+        self.chilling = True
+        self.notchill = 0
+        self.chill = 0
+        self.reallyvisible = False
+        
         if not hasattr(Enemy, "sprites"):
             Enemy.sprites = self.load_assets()
             print("loading...")
         else:
             print("already loaded!")
-
+        
     def draw(self):
         if DEVMAP == 1:
             pygame.draw.rect(self.screen, "red", (self.rect.center, (10, 10)))
@@ -181,6 +197,7 @@ class Enemy(pygame.sprite.Sprite):
                         #     if ((scr[x][y] >> 24) & 255) == 255:
                         #         scr[x][y] = img[x - self.rect.x][y - self.rect.y] & CLR_W
 
+    
     def check_walls(self):
         if (self.pos[0] - self.player.rect.centerx) != 0:
             m = (self.pos[1] - self.player.rect.centery) / (self.pos[0] - self.player.rect.centerx)
@@ -214,17 +231,215 @@ class Enemy(pygame.sprite.Sprite):
 
             return False        # no walls hit
 
+    def move(self):
+        
+        volume = 1/sqrt((self.player.rect.centerx - self.pos[0])**2+(self.player.rect.centery - self.pos[1])**2) * 10
+        pygame.mixer.Sound.set_volume(self.sound.jump, 1)
+        pygame.mixer.Sound.set_volume(self.sound.running, volume * 10)
+        pygame.mixer.Sound.set_volume(self.sound.chased, 0)
+        pygame.mixer.Sound.set_volume(self.sound.ambient, volume)
+        
+        #TODO: MOVEANGLE LOGIC
+        '''
+        if self.chilling:
+            if self.mode == 1 and self.chill == 0 and not self.reallyvisible:
+                self.sound.ambient.play(-1)
+                self.chill += 1
+            if self.mode == 1 and self.reallyvisible:
+                self.chill = 0
+                self.chilling = False
+                #self.sound.jump.play()
+                self.sound.ambient.stop()
+                self.sound.chased.play(-1)
+                self.sound.running.play(-1)
+                self.mode = random.randint(2,2)
+        
+        if not self.chilling:
+            self.notchill += 1
+            if self.notchill >= 1000: 
+                self.sound.chased.fadeout(100)
+                if self.reallyvisible:
+                    self.sound.jump.play()
+                self.notchill = 0
+            if (self.mode == 1 or self.mode == 3) and not self.reallyvisible:
+                self.chilling = True
+                self.notchill = 0
+                self.sound.chased.fadeout(100)
+                self.sound.running.fadeout(100)
+        '''
+        
+        if self.mode == 3:
+            pass
+        if self.moveIn:
+            xo = self.player.rect.centerx - self.pos[0]
+            yo = self.player.rect.centery - self.pos[1]
+            
+            movedirection = atan(xo/(yo+0.000001))/DEG + 90
+            
+            movedirection = 180 - movedirection
+            
+            if yo < 0:
+                movedirection = movedirection + 180
+            #print("movedirection", movedirection)
+            
+            self.angle = -(180 - movedirection)
+            
+            dx = self.speed*-math.cos(self.angle*pi/180)
+            dy = self.speed*-math.sin(self.angle*pi/180)
+            #print("dx dy", dx, dy)
+            #print()
+                    
+            self.pos = (self.pos[0] + dx, self.pos[1] + dy)
+            
+            #TODO: If monster is stopped by wall, goModule
+            
+            #if monster is stopped by wall, iterate through modules
+            #the module that is the closest to monster's current position will be selected.
+            #
+            
+        elif self.decide:
+            
+            #TODO: If mode == 2, play chased and running, distance based volume
+            #TODO: If mode == 2 and monster is not stopped by walls, moveIn
+            #TODO: If mode == 2 and 25 decisions made, mode == 3.
+            
+            #TODO: If mode == 1 and monster seen by player, play jumpscare sound. 
+            #TODO: If mode == 1 and monster seen, flip a coin for mode 1 or mode 3
+            
+            #TODO: If mode == 3, stop all sounds and play running. Distance based volume
+            #TODO: If mode == 3 and 10 decisions made, mode == 1.
+            
+            try:
+                up = MODULE[self.currCol][self.currRow-1]
+            except:
+                up = MODULE[self.currCol][self.currRow]
+            try:
+                down = MODULE[self.currCol][self.currRow+1]
+            except:
+                down = MODULE[self.currCol][self.currRow]
+            try:
+                left = MODULE[self.currCol-1][self.currRow]
+            except:
+                left = MODULE[self.currCol][self.currRow]
+            try:
+                right = MODULE[self.currCol+1][self.currRow]
+            except:
+                right = MODULE[self.currCol][self.currRow]
+            
+            directions = {
+                up:((up[0] - self.player.rect.centerx)**2 + (up[1] - self.player.rect.centery)**2),
+                down:((down[0] - self.player.rect.centerx)**2 + (down[1] - self.player.rect.centery)**2),
+                left:((left[0] - self.player.rect.centerx)**2 + (left[1] - self.player.rect.centery)**2),
+                right:((right[0] - self.player.rect.centerx)**2 + (right[1] - self.player.rect.centery)**2),
+                }
+            
+            if self.mode == 1:
+                distance = sqrt((self.player.rect.centerx - self.pos[0])**2 + (self.player.rect.centery - self.pos[1])**2)
+                if distance < (525 - self.chill/2):
+                    moveAway = True
+                    moveClose = False
+                if distance > (525 - self.chill/2):
+                    moveClose = True
+                    moveAway = False
+            if self.mode == 2:
+                moveClose = True
+                moveAway = False
+            if self.mode == 3:
+                moveAway = True
+                moveClose = False
+        
+            #TODO: RAYCAST OUT AND POP BLOCKED 
+            
+            if len(directions) != 1:
+                if MODULE[self.prevRow][self.prevCol] == directions[up]:
+                    directions.pop(up)
+                elif MODULE[self.prevRow][self.prevCol] == directions[down]:
+                    directions.pop(down)
+                elif MODULE[self.prevRow][self.prevCol] == directions[left]:
+                    directions.pop(left)
+                elif MODULE[self.prevRow][self.prevCol] == directions[right]:
+                    directions.pop(right)
+        
+            if moveAway:
+                desired = sorted(directions.items(), key=lambda x:x[1], reverse=True)
+            elif moveClose:
+                desired = sorted(directions.items(), key=lambda x:x[1], reverse=False)
+                #print("desried", desired)
+            
+            #print(desired[0][1])
+            desiredDist = desired[0][1]
+            #print(list(filter(lambda x: directions[x] == desiredDist, directions)))
+            self.desiredSpot = list(filter(lambda x: directions[x] == desiredDist, directions))[0]
+            #print(self.desiredSpot)
+        
+            self.prevRow = self.currRow
+            self.prevCol = self.currCol
+            self.currRow = (desired[0][0][0] - 100) // 175
+            self.currCol = (desired[0][0][1] - 100) // 175
+            
+            self.decide = False
+        
+        else:
+            
+            #print("THIS IS WORKING")
+            
+            #print("desiredSpot", self.desiredSpot)
+            #print("pos", self.pos)
+            xc,yc = self.desiredSpot
+            xo = round(xc - self.pos[0])
+            yo = round(yc - self.pos[1])
+            
+            #print("xo yo",xo, yo)
+            
+            movedirection = atan(xo/(yo+0.000001))/DEG + 90
+            
+            movedirection = 180 - movedirection
+            
+            if yo < 0:
+                movedirection = movedirection + 180
+            print("movedirection",movedirection)
+            
+            self.angle = -(180 - movedirection)
+            
+            dx = self.speed * -math.cos(self.angle*pi/180)
+            dy = self.speed * -math.sin(self.angle*pi/180)
+            print("dx dy",dx, dy)
+            
+                    
+            self.pos = (self.pos[0] + dx, self.pos[1] + dy)
+            print(self.desiredSpot[0] - 25 < self.pos[0] < self.desiredSpot[0] + 25 and self.desiredSpot[1] - 25 < self.pos[1] < self.desiredSpot[1] + 25)
+            if(self.desiredSpot[0] - 6.25 < self.pos[0] < self.desiredSpot[0] + 6.25 and self.desiredSpot[1] - 6.25 < self.pos[1] < self.desiredSpot[1] + 6.25):
+                self.decide = True
+            print()
+            #if self.desiredSpot
+            
+        
+        
+        
+        
+        
+        #self.angle = abs(atan(dy/(dx+0.0001))/DEG)
+        
+        #if dx <= 0 and dy > 0:
+        #    self.angle = 180 - self.angle
+        #if dx > 0 and dy <= 0:
+        #    self.angle = 360 - self.angle
+        #if dx <= 0 and dy <= 0:
+        #    self.angle += 180
+        
+        
+    
     def ray_trace(self):
-
-        # TODO: 10 rays, which the monster uses to see
-        # TODO: line, which connects monster and player. if line is unobstructed, monster in mode 1 slowly moves toward the player
+        
+        #TODO: 10 rays, which the monster uses to see
+        #TODO: line, which connects monster and player. if line is unobstructed, monster in mode 1 slowly moves toward the player
         #      in mode 2, monster quickly moves toward player. in mode 3, monster wants to lengthen line and obstruct view
-        # TODO: usage of rays:
-
+        #TODO: usage of rays: 
+        
         pass
-
-# line between sprite and player
-# if there is an object between player and sprite do not render
+        
+#line between sprite and player
+#if there is an object between player and sprite do not render
 
     @staticmethod
     def load_assets():
